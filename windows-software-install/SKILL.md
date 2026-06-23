@@ -321,7 +321,51 @@ Remove-Item -Recurse -Force 'HKCU:\SOFTWARE\Python\PythonCore\3.14' -ErrorAction
 
 ---
 
-## 3. Hermes Agent 管理
+## 3. Node.js (winget 管理)
+
+### 版本选择
+
+| 版本 | Winget ID | 说明 |
+|------|-----------|------|
+| Node.js (LTS) | `OpenJS.NodeJS.LTS` | 长期支持版，推荐（本机已装 v24.17.0） |
+| Node.js 最新 | `OpenJS.NodeJS` | 最新尝鲜版（v26+） |
+
+### 安装 / 升级
+
+```powershell
+# 安装 LTS 版
+winget install OpenJS.NodeJS.LTS --accept-source-agreements -h
+
+# 升级到最新 LTS
+winget upgrade OpenJS.NodeJS.LTS --accept-source-agreements -h
+```
+
+**注意**：
+- winget 安装 Node.js 到 `C:\Program Files\nodejs\`，自动添加到 PATH
+- 自带 npm（本机 v11.11.0）
+- 升级后需**新开终端**才会生效（当前 shell PATH 不会自动刷新）
+
+### 当前状态
+
+| 项目 | 值 |
+|------|----|
+| 版本 | **24.17.0**（LTS，winget 管理） |
+| 安装路径 | `C:\Program Files\nodejs\` |
+| npm | 自带（11.x） |
+| PATH | 自动添加，优先级在系统级 |
+| `winget upgrade --all` | 可自动检测更新 ✅ |
+
+### 故障排查
+
+| 症状 | 原因 | 修复 |
+|------|------|------|
+| `node --version` 还是旧版 | 当前 shell PATH 未刷新 | 开新终端，或 `hash -r` 刷新 |
+| 升级超时 | Node.js 安装包是 zip 压缩包，下载/解压慢 | 重试，设较长 timeout（≥180s） |
+| npm 全局包找不到 | 全局路径不在 PATH | `npm config get prefix` 检查，加到 PATH |
+
+---
+
+## 4. Hermes Agent 管理
 
 Hermes Agent 是本机的 AI 助手框架，管理它本身也属于"软件维护"的一部分。
 
@@ -463,7 +507,7 @@ schtasks /Delete /TN Hermes_Gateway /F  # 删除网关计划任务
 
 ---
 
-## 4. 通用技巧与坑
+## 5. 通用技巧与坑
 
 ### Winget 注意事项
 - **不要用 `-h` 参数**：winget 的 `-h` 不是 `--help`，而是 `--silent`（静默安装）
@@ -501,7 +545,7 @@ export PATH=$PATH:/c/Program\ Files/Everything
 
 ---
 
-## 5. 验证清单
+## 6. 验证清单
 
 - [ ] 软件能启动 / CLI 能响应
 - [ ] PATH 在新终端中可访问
@@ -511,7 +555,8 @@ export PATH=$PATH:/c/Program\ Files/Everything
 - [ ] 翻墙代理已关闭（如果不需继续使用）
 - [ ] `winget upgrade --all` 可检测到更新
 - [ ] `py -0` 仅显示 winget 版 + Hermes venv 源（无 2.7、3.14 等旧版）
-- [ ] 系统 PATH 无 `Python27`、`Local\Python\bin` 等残留
+- [ ] 系统 PATH 无 `Python27`、`Local\\Python\\bin` 等残留
+- [ ] **推送到 GitHub** `git@github.com:KumoKyaku/hermes-skills.git`（`git add → commit → push`）
 
 ## 相关参考
 
