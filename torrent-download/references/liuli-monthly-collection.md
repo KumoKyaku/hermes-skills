@@ -7,7 +7,7 @@
 ```
 E:/SystemCacheInfo/琉璃神社/20XX年合集/20XX年MM月合集/
 ```
-- 2026 年已存：01-07 月（04-07 月通过 FDM 下载成功；07月 2026-09-05 下完）
+- 2026 年已存：01-09 月（08/09 月 2026-10-17 用 aria2c 直连下完，08月 8.2G/40文件，09月 8.4G/47文件）
 - 合集发布滞后：N 月合集约在 N+1 月 15-16 号发布（如 6 月合集 7/16 发布，7 月合集 8/16 左右）
 
 ## 域名现状（2026-09-05 验证）
@@ -18,6 +18,12 @@ E:/SystemCacheInfo/琉璃神社/20XX年合集/20XX年MM月合集/
 - hacg.casa / hacg.la ⚠️ 曾是镜像（liulishe.ooo 公告 2026-04 提到 hacg.casa/wp）；liulishe.ooo 是地址公告页，域名轮换时去那找最新地址
 - hacg.icu ❌ 已挂（旧域名，2026-06 时可用）
 - www.liuli.in ❌ 已彻底失效：有 FingerprintJS 指纹跳转保护（curl 只能拿到跳转页），跟随 `tr_uuid&fp=` 跳转后落到 **ww38.liuli.in 停放页（HTTP 502）** → 域名已被注册商接管。别在 liuli.in 上浪费时间
+
+### 2026-10-17 复核
+
+- **www.hacg.mov** ✅ 最新（合集文章 `/wp/103154.html` = 2026年09月合集，10-16 18:41 发布）
+- **www.hacg.icu** ⚠️ 首页内容陈旧（仍停留在 07 月合集条目），别用它判断最新月份；liuli.app 公告把 hacg.icu 写成"最新正确地址"，与实际内容不符
+- 判断最新合集：抓 `https://www.hacg.mov/wp/tag/动画合集`（标签页按新到旧排列，第一行就是最新月）
 
 ## 快速检查"最新合集出了没"（用户每月例行）
 
@@ -80,6 +86,24 @@ aria2c --bt-metadata-only=true --bt-save-metadata=true --bt-stop-timeout=80 --se
   2. `terminal(background=true, ... ./fdm.exe 'C:/Users/Sun47/AppData/Local/Temp/<hash>.torrent')` — **任务创建即带齐 destinationPath+title，零"请求信息中"等待，直接开下**
 - 下载完成后**字节求和验证**：python os.walk 求目录字节总和 == `aria2c --show-files` 的 Total Length（07月实测 14,493,322,778 零误差）
 - **完成后更新本地记录**：`E:/SystemCacheInfo/琉璃神社/全部合集磁力链.txt` 追加该月 hash 行、更新"本地磁盘状态"段落（2026年: 01-07月 全齐）——用户靠这个文件追踪已下月份
+
+## ✅ 2026-10-17 实测：aria2c 直连下 BT 成功（150 Mbps 家宽，5.8 + 2.9 MiB/s）
+
+08/09 两个月合集共 17 GiB，`aria2c -j 2` 二十几分钟下完，零失败、零残留 .aria2 文件。命令（后台跑，日志留 C 盘）：
+
+```bash
+aria2c -j 2 --summary-interval=120 --seed-time=0 --file-allocation=none \
+  --max-connection-per-server=16 --console-log-level=warn \
+  --dir="E:/SystemCacheInfo/琉璃神社/2026年合集" "magnet:?xt=urn:btih:<hash>" ...
+```
+
+- 所以别一上来就判定"BT 被掐"——**先实测 60 秒看 DL 速率**。有速率就用 aria2c（能脚本化、可续传、进度可查），DL:0B 才退回 FDM。
+- 验证进度别看 `du`（BT 会预创建稀疏文件，du 显示接近满额），用 `process_manage poll` 读 aria2c 的 `[DL:xx MiB][#gid 已下/总大小(%)]` 行最准。
+- 完成校验：文件数 / 0 字节文件数 / 残留 `.aria2` 数 / CHS·CHT·RAW 分项计数，与 `--show-files` 清单对得上才算完。
+
+### ⚠️ 2026年9月起合集内部命名格式变了
+
+09 月包的视频不再是 `[260828][Studio]Title.chs.mp4`，而是连写的 `260925魔人NTR騎士_第1話_副标题_chs.mp4`（无方括号、下划线分隔、`_chs/_cht` 后缀）。整理脚本需配套策略，否则整月 27 个文件全部解析失败、既不归类也不进单集清单。详见 `liuli-series-organizer` 技能的新增陷阱段落。
 
 ## 下载：aria2c 直连大概率失败，用 FDM
 
