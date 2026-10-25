@@ -124,6 +124,17 @@ if score >= 4: return sk
 - **前作文件扫描时 `dedup_check=True`** — 跳过已有 `(ep_num, lang)` 组合
 - **不删除任何原始文件**
 
+## 只看简体：CHT（繁体）一律不保留
+
+**用户明确要求（2026-10）：不看繁体版，以后下载也不要繁体。** 库里视频只留 `CHS/` 和 `RAW/`。
+
+- 清理脚本：`scripts/purge_cht.py`（默认 dry-run，加 `--delete` 才真删）
+- 关键：CHT 在「原始合集」和「按系列」两处都有硬链接，**只删一处不释放空间**，必须两棵树全扫全删，脚本按 `(st_dev, st_ino)` 去重算真实释放量
+- 2026-10-17 实测：655 个 CHT / 422 个独立 inode / 释放 **152.25 GiB**（E 盘剩余 69→221 GB）
+- ⚠️ **删前先查孤儿**：少数作品只有 CHT 没有 CHS。脚本以「月合集/系列目录」为单位递归比对 base_key，孤儿自动保留。当时剩 5 个（図書室ノ彼女、Knight of Erin 1st tale、くノ一○○伝 紫陽花 第二話、アオハルスナッチ2）
+- 删完顺手清理变空的 `CHT/`、`BIG5/` 目录（当时清掉 124 个）
+- 下载时就排除更省事：见 `torrent-download/references/liuli-monthly-collection.md` 的 `--select-file` 用法（省约 1/3 体积和带宽）
+
 ## 执行脚本
 
 - 主脚本：`E:\SystemCacheInfo\琉璃神社\execute_series_v4.py`
