@@ -105,23 +105,25 @@ aria2c -j 2 --summary-interval=120 --seed-time=0 --file-allocation=none \
 
 09 月包的视频不再是 `[260828][Studio]Title.chs.mp4`，而是连写的 `260925魔人NTR騎士_第1話_副标题_chs.mp4`（无方括号、下划线分隔、`_chs/_cht` 后缀）。整理脚本需配套策略，否则整月 27 个文件全部解析失败、既不归类也不进单集清单。详见 `liuli-series-organizer` 技能的新增陷阱段落。
 
-## 只看简体：下载时排除 CHT（用户 2026-10 明确要求）
+## 只看简体：CHT / BIG5 / RAW / 720P 都不下（用户 2026-10 明确要求）
 
-**用户不看繁体版。** 合集包里 CHT 约占 1/3 体积（08月包 8.1 GiB 里 CHT 2.7 GiB），下之前排除能省带宽和时间：
+**用户只看简体中文。** 合集包里简体只占约 1/3（08月包 8.1 GiB 里 CHS 2.7 GiB），而且 RAW/720P 是无字幕原片、CHT/BIG5 是繁体，全都不需要。
 
 ```bash
-# 1) 先拿元数据并列清单
+# 1) 元数据 + 清单
 aria2c --bt-metadata-only=true --bt-save-metadata=true --follow-torrent=false \
   --bt-stop-timeout=45 --dir="$LOCALAPPDATA/Temp" "magnet:?xt=urn:btih:<hash>"
-aria2c --show-files "$LOCALAPPDATA/Temp/<hash>.torrent"   # 记下 idx 与路径
+aria2c --show-files "$LOCALAPPDATA/Temp/<hash>.torrent"
 
-# 2) 排除路径含 /CHT/ 的索引，其余全选（示例：8月包 40 个文件，CHT 是第 8-14 号）
-aria2c --select-file=1-7,15-40 ... "magnet:?xt=urn:btih:<hash>"
+# 2) 只选 CHS/ + 海报/预告/简评/字体/字幕 等小文件，跳过 CHT/CHT/BIG5/RAW/720P
+aria2c --select-file=<CHS 与小文件的 idx 列表> --dir="E:/SystemCacheInfo/琉璃神社/2026年合集" \
+  "magnet:?xt=urn:btih:<hash>"
 ```
 
-- 索引按 `--show-files` 输出顺序数（从 1 开始），路径里带 `CHT/` 或 `BIG5/` 的就是繁体，跳过即可
-- ⚠️ 老合集（2019-2020 桜都字幕组）繁体目录叫 `BIG5/`，别只认 CHT
-- 已经下完整包的，用 `liuli-series-organizer` 技能的 `scripts/purge_cht.py --delete` 清理（会同时删原始合集和按系列里的硬链接，并保留只有繁体的孤儿作品）
+- 索引按 `--show-files` 输出顺序从 1 数；`/CHS/`、`*海报/`、`*预告/`、`*.txt`、`Subs.zip`、`Fonts.zip` 保留，其余全跳
+- 老合集（2019-2020 桜都字幕组）的简体目录可能叫 `GB/`，繁体是 `BIG5/`，别只认 CHS/CHT
+- ⚠️ 极少数作品整包内只有 RAW（2019 年前后常见）→ 下完后对比该月作品清单，缺简体再单独补对应 RAW
+- 已下完整包的用 `liuli-series-organizer` 的 `scripts/purge_noncn.py --delete` 清理（同时删原始合集和按系列里的硬链接，保留只有非简体版的孤儿）
 
 ## 下载：aria2c 直连大概率失败，用 FDM
 
